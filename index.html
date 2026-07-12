@@ -634,7 +634,6 @@
                         <thead>
                             <tr>
                                 <th>Business</th>
-                                <th>Contact</th>
                                 <th>Rating</th>
                                 <th>Status</th>
                                 <th>Called By</th>
@@ -705,8 +704,8 @@
             ADDRESS: 5,
             REVIEWS: 6,
             WEBSITE: 7,
-            EMAILS: 8,
-            EMAIL_PAGE: 9,
+            PLACE_ID: 8,
+            GPS: 9,
             CALL_STATUS: 10,
             CALLED_BY: 11,
             LAST_CALLED: 12,
@@ -785,7 +784,7 @@
         
         // Fetch leads from spreadsheet
         async function fetchLeads() {
-            const range = `A2:N`;
+            const range = `A2:O`;
             const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.spreadsheetId}/values/${range}?majorDimension=ROWS`;
             
             try {
@@ -1013,10 +1012,7 @@
                         <td>
                             <div class="lead-name">${escapeHtml(lead[COL.TITLE] || 'Unknown')}</div>
                             <div class="lead-phone">${escapeHtml(lead[COL.PHONE] || '')}</div>
-                            ${lead[COL.WEBSITE] ? `<a href="${escapeHtml(lead[COL.WEBSITE])}" target="_blank" class="lead-website">Website ↗</a>` : ''}
-                        </td>
-                        <td>
-                            ${lead[COL.EMAILS] ? `<a href="mailto:${escapeHtml(lead[COL.EMAILS])}" class="lead-email">${escapeHtml(lead[COL.EMAILS])}</a>` : '<span class="lead-email">No email</span>'}
+                            <div style="font-size: 0.75rem; color: #6b7280; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHtml(lead[COL.ADDRESS] || '')}</div>
                         </td>
                         <td>
                             <div class="rating">
@@ -1068,7 +1064,7 @@
                 const matchesSearch = !searchTerm || 
                     (lead[COL.TITLE] || '').toLowerCase().includes(searchTerm) ||
                     (lead[COL.PHONE] || '').toLowerCase().includes(searchTerm) ||
-                    (lead[COL.EMAILS] || '').toLowerCase().includes(searchTerm);
+                    (lead[COL.ADDRESS] || '').toLowerCase().includes(searchTerm);
                 
                 const matchesStatus = currentStatusFilter === 'all' || 
                     (lead[COL.CALL_STATUS] || 'New').toLowerCase() === currentStatusFilter.toLowerCase();
