@@ -785,8 +785,8 @@
         
         // Fetch leads from spreadsheet
         async function fetchLeads() {
-            // First try to read all data
-            const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.spreadsheetId}/values/A:Z?key=AIzaSyDummy`;
+            // Read all columns A through Z to get any existing data
+            const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.spreadsheetId}/values/A:Z?majorDimension=ROWS`;
             
             try {
                 const response = await fetch(url, {
@@ -808,8 +808,16 @@
                 console.log('First data row:', values[1]);
                 console.log('Total rows:', values.length);
                 
-                // Return all rows except header
-                return values.slice(1);
+                // Return all rows except header, pad rows with missing columns
+                const rows = values.slice(1);
+                return rows.map(row => {
+                    // Pad row to have at least 14 columns (A through N)
+                    const padded = [...row];
+                    while (padded.length < 14) {
+                        padded.push('');
+                    }
+                    return padded;
+                });
             } catch (error) {
                 console.error('Error fetching leads:', error);
                 throw error;
