@@ -613,6 +613,7 @@
         <!-- Dashboard -->
         <div id="dashboard" style="display: none;">
             <div class="stats-grid" id="statsGrid"></div>
+            <div id="debugInfo" style="background:#f3f4f6;padding:1rem;border-radius:0.5rem;margin-bottom:1rem;font-size:0.75rem;font-family:monospace;white-space:pre-wrap;display:none;"></div>
             
             <div class="controls">
                 <div class="search-box">
@@ -784,8 +785,8 @@
         
         // Fetch leads from spreadsheet
         async function fetchLeads() {
-            const range = `A2:O`;
-            const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.spreadsheetId}/values/${range}?majorDimension=ROWS`;
+            // First try to read all data
+            const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.spreadsheetId}/values/A:Z?key=AIzaSyDummy`;
             
             try {
                 const response = await fetch(url, {
@@ -797,7 +798,18 @@
                 }
                 
                 const data = await response.json();
-                return data.values || [];
+                console.log('Raw sheet data:', data);
+                
+                const values = data.values || [];
+                if (values.length === 0) return [];
+                
+                // Log headers for debugging
+                console.log('Headers:', values[0]);
+                console.log('First data row:', values[1]);
+                console.log('Total rows:', values.length);
+                
+                // Return all rows except header
+                return values.slice(1);
             } catch (error) {
                 console.error('Error fetching leads:', error);
                 throw error;
@@ -1163,6 +1175,11 @@
                     // Fetch leads
                     leads = await fetchLeads();
                     filteredLeads = [...leads];
+                    
+                    // Show debug info
+                    const debugEl = document.getElementById('debugInfo');
+                    debugEl.style.display = 'block';
+                    debugEl.textContent = `Found ${leads.length} leads\n\nSample row (first lead):\n${JSON.stringify(leads[0], null, 2)}\n\nAll row lengths:\n${leads.slice(0, 5).map((r, i) => `Row ${i}: ${r.length} cols -> ${r.slice(0, 5).join(' | ')}`).join('\n')}`;
                     
                     // Render
                     renderStats();
